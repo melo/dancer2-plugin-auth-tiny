@@ -8,7 +8,7 @@ package Dancer2::Plugin::Auth::Tiny;
 
 use Carp qw/croak/;
 
-use Dancer2::Plugin;
+use Dancer2::Plugin ':no_dsl';
 
 my %confs;
 my %dispatch = ( login => \&_build_login, );
