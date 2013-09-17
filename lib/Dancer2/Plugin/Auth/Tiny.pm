@@ -10,7 +10,7 @@ use Carp qw/croak/;
 
 use Dancer2::Plugin;
 
-my $conf;
+my %confs;
 my %dispatch = ( login => \&_build_login, );
 
 register 'needs' => sub {
@@ -36,8 +36,8 @@ sub extend {
 
 sub _build_login {
     my ( $dsl, $coderef ) = @_;
+    my $conf = _conf_for($dsl);
     return sub {
-        $conf ||= { _default_conf(), %{ plugin_setting() } }; # lazy
         my $request = $dsl->app->context->request;
         if ( $dsl->app->session( $conf->{logged_in_key} ) ) {
             goto $coderef;
@@ -52,6 +52,14 @@ sub _build_login {
             return $dsl->app->context->redirect( $request->uri_for( $conf->{login_route}, $data ) );
         }
     };
+}
+
+sub _conf_for {
+  my ($dsl) = @_;
+
+  my $app_class = $dsl->dancer_app->name;
+  return $confs{$app_class} ||= { _default_conf(), %{ plugin_setting() } };
+
 }
 
 sub _default_conf {
